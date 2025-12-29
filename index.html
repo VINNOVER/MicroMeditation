@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-Méditation - Session de respiration consciente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            overflow-x: hidden;
+        }
+        
+        /* Animation de respiration */
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 25px rgba(74, 222, 128, 0);
+            }
+        }
+        
+        /* Animation de l'arrière-plan aurora */
+        @keyframes aurora {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        /* Animation pour le timer */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .aurora-bg {
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #0c4a6e, #1e3a8a);
+            background-size: 400% 400%;
+            animation: aurora 30s ease infinite;
+        }
+        
+        .breathing-btn {
+            animation: breathe 8s ease-in-out infinite;
+        }
+        
+        .focus-mode {
+            transition: all 0.5s ease;
+        }
+        
+        .timer-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .sound-wave {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #4ade80, transparent);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sound-wave::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: sound-wave 1.5s linear infinite;
+        }
+        
+        @keyframes sound-wave {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        .hidden-element {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .visible-element {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        /* Animation de progression */
+        @keyframes progress {
+            0% {
+                width: 0%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+        
+        .progress-bar {
+            animation: progress 5s linear forwards;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Graph styles */
+        .graph-bar {
+            height: 20px;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 10px;
+            margin: 5px 0;
+            transition: width 0.5s ease;
+        }
+        
+        /* Music player styles */
+        .music-option {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .music-option:hover {
+            transform: translateY(-2px);
+            border-color: #4ade80;
+        }
+        
+        .music-option.active {
+            border-color: #4ade80;
+            background-color: rgba(74, 222, 128, 0.1);
+        }
+        
+        /* Volume slider customization */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-track {
+            background: #374151;
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            margin-top: -6px;
+        }
+        
+        input[type="range"]::-moz-range-track {
+            background: #374151;
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            border: none;
+        }
+        
+        /* Audio visualization */
+        .audio-visualizer {
+            display: flex;
+            align-items: flex-end;
+            height: 40px;
+            gap: 2px;
+        }
+        
+        .audio-bar {
+            width: 4px;
+            background-color: #4ade80;
+            border-radius: 2px;
+            animation: audioBar 0.5s ease infinite alternate;
+        }
+        
+        @keyframes audioBar {
+            0% {
+                height: 5px;
+            }
+            100% {
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body class="aurora-bg min-h-screen text-white flex flex-col items-center justify-center p-4 transition-all duration-500">
+    <!-- Audio Elements -->
+    <audio id="lofiMusic" loop>
+        <!-- Lo-Fi music from online source -->
+        <source src="https://assets.codepen.io/1468070/lofi-study-1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="natureSounds">
+        <!-- Nature sounds from online source -->
+        <source src="https://assets.codepen.io/1468070/forest-with-small-river-birds-and-nature-field-recording.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="ambientMusic">
+        <!-- Ambient music from online source -->
+        <source src="https://assets.codepen.io/1468070/ambient-pad-14365.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="breathingSound">
+        <!-- Breathing sound effect -->
+        <source src="https://assets.codepen.io/1468070/deep-breath.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="startSound">
+        <!-- Start sound effect -->
+        <source src="https://assets.codepen.io/1468070/start-sound.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="endSound">
+        <!-- End sound effect -->
+        <source src="https://assets.codepen.io/1468070/meditation-bell.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- Navigation -->
+    <nav class="absolute top-0 left-0 right-0 p-6 flex justify-between items-center focus-mode z-50">
+        <div class="text-2xl font-bold flex items-center">
+            <i class="fas fa-spa mr-3 text-green-400"></i>
+            <span>MicroMéditation</span>
+        </div>
+        
+        <div class="flex items-center space-x-6">
+            <a href="#" class="hover:text-green-300 transition-colors">
+                <i class="fas fa-home mr-2"></i>Accueil
+            </a>
+            <button id="sessionsBtn" class="hover:text-green-300 transition-colors flex items-center">
+                <i class="fas fa-history mr-2"></i>Sessions
+            </button>
+            <button id="profileBtn" class="hover:text-green-300 transition-colors flex items-center">
+                <i class="fas fa-user mr-2"></i>Profil
+            </button>
+            <button id="focusToggle" class="bg-emerald-700 hover:bg-emerald-600 px-4 py-2 rounded-full flex items-center transition-colors">
+                <i class="fas fa-crosshairs mr-2"></i>Mode Focus
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Modals -->
+    <!-- Modal Sessions -->
+    <div id="sessionsModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Historique des Sessions</h2>
+                <button id="closeSessionsModal" class="text-2xl hover:text-green-400">&times;</button>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xl font-bold">Statistiques</h3>
+                    <button id="clearSessions" class="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Tout effacer</button>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gray-800/50 p-4 rounded-xl text-center">
+                        <div class="text-3xl font-bold" id="totalSessions">0</div>
+                        <div class="text-gray-300 text-sm">Sessions totales</div>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl text-center">
+                        <div class="text-3xl font-bold" id="totalTime">0min</div>
+                        <div class="text-gray-300 text-sm">Temps total</div>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl text-center">
+                        <div class="text-3xl font-bold" id="avgDuration">0min</div>
+                        <div class="text-gray-300 text-sm">Durée moyenne</div>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4">Graphique des 7 derniers jours</h3>
+                <div id="weeklyChart" class="mb-6">
+                    <!-- Graph will be generated here -->
+                </div>
+            </div>
+            
+            <h3 class="text-xl font-bold mb-4">Sessions récentes</h3>
+            <div id="sessionsList" class="space-y-4 max-h-60 overflow-y-auto p-2">
+                <!-- Sessions will be listed here -->
+                <p class="text-gray-400 text-center py-4">Aucune session enregistrée</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Profil -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Mon Profil</h2>
+                <button id="closeProfileModal" class="text-2xl hover:text-green-400">&times;</button>
+            </div>
+            
+            <div class="mb-6 flex items-center">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center text-2xl font-bold mr-4">
+                    <i class="fas fa-user text-3xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold" id="userName">Méditant Zen</h3>
+                    <p class="text-gray-300">Membre depuis <span id="joinDate">01/01/2023</span></p>
+                    <div class="flex items-center mt-2">
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="ml-2 text-sm">Niveau 4</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-xl font-bold mb-4">Mes Préférences</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span>Durée par défaut</span>
+                        <select id="defaultDuration" class="bg-gray-800 text-white px-3 py-1 rounded">
+                            <option value="60">1 minute</option>
+                            <option value="180">3 minutes</option>
+                            <option value="300" selected>5 minutes</option>
+                            <option value="600">10 minutes</option>
+                            <option value="900">15 minutes</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Type de musique</span>
+                        <select id="musicType" class="bg-gray-800 text-white px-3 py-1 rounded">
+                            <option value="lofi">Lo-Fi</option>
+                            <option value="nature">Sons de la nature</option>
+                            <option value="ambient">Ambient</option>
+                            <option value="breathing">Respiration guidée</option>
+                            <option value="none">Aucune musique</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Notifications</span>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="enableNotifications" class="mr-2 h-5 w-5 rounded" checked>
+                            <label for="enableNotifications">Activées</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-xl font-bold mb-4">Objectifs</h3>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>Sessions par semaine</span>
+                            <span id="sessionsProgress">0/5</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div id="sessionsGoalBar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>Temps total mensuel</span>
+                            <span id="timeProgress">0/120min</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div id="timeGoalBar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="saveProfile" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-bold transition-colors">
+                <i class="fas fa-save mr-2"></i>Enregistrer les modifications
+            </button>
+        </div>
+    </div>
+    
+    <!-- Contenu principal -->
+    <main class="flex flex-col items-center justify-center w-full max-w-4xl mt-20">
+        <div class="text-center mb-12 focus-mode">
+            <h1 class="text-5xl font-bold mb-4">Session de Micro-Méditation</h1>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                Prenez 5 minutes pour vous recentrer. Inspirez, expirez, et laissez le stress s'envoler.
+            </p>
+        </div>
+        
+        <!-- Timer en mode focus (caché par défaut) -->
+        <div id="focusTimer" class="hidden mb-12">
+            <div class="text-center">
+                <div class="text-8xl font-bold timer-pulse mb-4" id="timerDisplay">05:00</div>
+                <p class="text-xl text-gray-300">Restez concentré sur votre respiration</p>
+            </div>
+        </div>
+        
+        <!-- Carte principale -->
+        <div class="bg-gray-900/50 backdrop-blur-sm rounded-3xl p-8 shadow-2xl w-full max-w-2xl focus-mode">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-10">
+                <!-- Section bouton de respiration -->
+                <div class="flex flex-col items-center flex-1">
+                    <h2 class="text-2xl font-bold mb-6">Respirez avec moi</h2>
+                    <div class="relative">
+                        <button id="breatheBtn" class="breathing-btn bg-gradient-to-br from-green-500 to-emerald-700 w-64 h-64 rounded-full flex flex-col items-center justify-center shadow-2xl transition-transform hover:scale-105 active:scale-95">
+                            <i id="playIcon" class="fas fa-play text-6xl mb-4"></i>
+                            <span id="playText" class="text-3xl font-bold">Démarrer</span>
+                        </button>
+                        
+                        <!-- Bouton stop séparé -->
+                        <button id="stopBtn" class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-red-600 hover:bg-red-700 w-16 h-16 rounded-full flex items-center justify-center shadow-xl transition-colors hidden">
+                            <i class="fas fa-stop text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <p class="mt-10 text-gray-300 text-center">Cliquez sur <i class="fas fa-play text-green-400"></i> pour démarrer la session</p>
+                    
+                    <!-- Sélecteur de musique -->
+                    <div class="mt-8 p-4 bg-gray-800/50 rounded-xl w-full max-w-xs">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-music text-green-400 mr-3"></i>
+                                <span>Ambiance sonore</span>
+                            </div>
+                            <button id="musicToggle" class="text-green-400 hover:text-green-300">
+                                <i id="musicIcon" class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <button class="music-option p-3 bg-gray-800/70 rounded-lg flex flex-col items-center" data-sound="lofi">
+                                <i class="fas fa-headphones text-lg mb-2"></i>
+                                <span class="text-sm">Lo-Fi</span>
+                            </button>
+                            <button class="music-option p-3 bg-gray-800/70 rounded-lg flex flex-col items-center" data-sound="nature">
+                                <i class="fas fa-tree text-lg mb-2"></i>
+                                <span class="text-sm">Nature</span>
+                            </button>
+                            <button class="music-option p-3 bg-gray-800/70 rounded-lg flex flex-col items-center" data-sound="ambient">
+                                <i class="fas fa-cloud text-lg mb-2"></i>
+                                <span class="text-sm">Ambient</span>
+                            </button>
+                            <button class="music-option p-3 bg-gray-800/70 rounded-lg flex flex-col items-center" data-sound="breathing">
+                                <i class="fas fa-wind text-lg mb-2"></i>
+                                <span class="text-sm">Respiration</span>
+                            </button>
+                        </div>
+                        
+                        <div class="sound-wave rounded-full mb-4" id="soundWave"></div>
+                        
+                        <!-- Visualiseur audio -->
+                        <div class="audio-visualizer mb-4 hidden" id="audioVisualizer">
+                            <div class="audio-bar" style="animation-delay: 0s"></div>
+                            <div class="audio-bar" style="animation-delay: 0.1s"></div>
+                            <div class="audio-bar" style="animation-delay: 0.2s"></div>
+                            <div class="audio-bar" style="animation-delay: 0.3s"></div>
+                            <div class="audio-bar" style="animation-delay: 0.4s"></div>
+                            <div class="audio-bar" style="animation-delay: 0.5s"></div>
+                            <div class="audio-bar" style="animation-delay: 0.6s"></div>
+                            <div class="audio-bar" style="animation-delay: 0.7s"></div>
+                        </div>
+                        
+                        <!-- Contrôle du volume -->
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-volume-down text-gray-400"></i>
+                            <input type="range" min="0" max="100" value="50" class="flex-1" id="volumeSlider">
+                            <i class="fas fa-volume-up text-gray-400"></i>
+                            <span class="text-sm w-12 text-right" id="volumeText">50%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Barre de progression de la session -->
+                    <div class="mt-6 w-full max-w-xs">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Progression</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="progressBar" class="bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section informations -->
+                <div class="flex-1">
+                    <h3 class="text-2xl font-bold mb-6">Votre session</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-gray-800/40 p-5 rounded-2xl">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-clock text-green-400 text-xl mr-3"></i>
+                                <h4 class="text-xl font-bold">Durée</h4>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <select id="sessionDuration" class="bg-gray-700 text-white px-3 py-1 rounded">
+                                    <option value="60">1 minute</option>
+                                    <option value="180">3 minutes</option>
+                                    <option value="300" selected>5 minutes</option>
+                                    <option value="600">10 minutes</option>
+                                </select>
+                                <div class="text-2xl font-bold" id="selectedDuration">05:00</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-800/40 p-5 rounded-2xl">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-brain text-green-400 text-xl mr-3"></i>
+                                <h4 class="text-xl font-bold">Bienfaits</h4>
+                            </div>
+                            <p>Réduction du stress, amélioration de la concentration, équilibre émotionnel.</p>
+                        </div>
+                        
+                        <div class="bg-gray-800/40 p-5 rounded-2xl">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-sliders-h text-green-400 text-xl mr-3"></i>
+                                <h4 class="text-xl font-bold">Réglages avancés</h4>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span>Son de démarrage</span>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="enableStartSound" class="mr-2 h-5 w-5 rounded" checked>
+                                        <label for="enableStartSound">Activé</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <span>Son de fin</span>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="enableEndSound" class="mr-2 h-5 w-5 rounded" checked>
+                                        <label for="enableEndSound">Activé</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <span>Guide de respiration</span>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="breathGuide" class="mr-2 h-5 w-5 rounded" checked>
+                                        <label for="breathGuide">Activé</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="mt-10 pt-8 border-t border-gray-700/50">
+                <h3 class="text-2xl font-bold mb-4">Instructions</h3>
+                <ol class="list-decimal pl-5 space-y-3 text-gray-300">
+                    <li>Choisissez une ambiance sonore</li>
+                    <li>Cliquez sur <strong>Démarrer</strong> pour commencer la session</li>
+                    <li>Suivez le rythme de respiration indiqué par l'animation</li>
+                    <li>Laissez les pensées aller et venir sans jugement</li>
+                    <li>Activez le mode Focus pour une immersion totale</li>
+                </ol>
+            </div>
+        </div>
+        
+        <!-- Statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full max-w-2xl focus-mode">
+            <div class="bg-gray-900/40 p-6 rounded-2xl flex flex-col items-center">
+                <i class="fas fa-calendar-check text-4xl text-green-400 mb-4"></i>
+                <div class="text-3xl font-bold" id="statsSessions">0</div>
+                <div class="text-gray-300">Sessions cette semaine</div>
+            </div>
+            
+            <div class="bg-gray-900/40 p-6 rounded-2xl flex flex-col items-center">
+                <i class="fas fa-stopwatch text-4xl text-green-400 mb-4"></i>
+                <div class="text-3xl font-bold" id="statsTime">0min</div>
+                <div class="text-gray-300">Temps total médité</div>
+            </div>
+            
+            <div class="bg-gray-900/40 p-6 rounded-2xl flex flex-col items-center">
+                <i class="fas fa-chart-line text-4xl text-green-400 mb-4"></i>
+                <div class="text-3xl font-bold" id="statsStreak">0</div>
+                <div class="text-gray-300">Jours consécutifs</div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="mt-16 mb-8 text-center text-gray-400 focus-mode">
+        <p>MicroMéditation &copy; 2023 - Conçu pour votre bien-être mental</p>
+        <p class="mt-2 text-sm">Toutes vos sessions sont sauvegardées localement dans votre navigateur</p>
+    </footer>
+
+    <script>
+        // Éléments audio
+        const lofiMusic = document.getElementById('lofiMusic');
+        const natureSounds = document.getElementById('natureSounds');
+        const ambientMusic = document.getElementById('ambientMusic');
+        const breathingSound = document.getElementById('breathingSound');
+        const startSound = document.getElementById('startSound');
+        const endSound = document.getElementById('endSound');
+        
+        // Éléments DOM
+        const breatheBtn = document.getElementById('breatheBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const playIcon = document.getElementById('playIcon');
+        const playText = document.getElementById('playText');
+        const musicToggle = document.getElementById('musicToggle');
+        const musicIcon = document.getElementById('musicIcon');
+        const soundWave = document.getElementById('soundWave');
+        const audioVisualizer = document.getElementById('audioVisualizer');
+        const focusToggle = document.getElementById('focusToggle');
+        const focusTimer = document.getElementById('focusTimer');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeText = document.getElementById('volumeText');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const sessionDuration = document.getElementById('sessionDuration');
+        const selectedDuration = document.getElementById('selectedDuration');
+        const musicOptions = document.querySelectorAll('.music-option');
+        const body = document.body;
+        
+        // Modals
+        const sessionsModal = document.getElementById('sessionsModal');
+        const profileModal = document.getElementById('profileModal');
+        const sessionsBtn = document.getElementById('sessionsBtn');
+        const profileBtn = document.getElementById('profileBtn');
+        const closeSessionsModal = document.getElementById('closeSessionsModal');
+        const closeProfileModal = document.getElementById('closeProfileModal');
+        const clearSessions = document.getElementById('clearSessions');
+        const saveProfile = document.getElementById('saveProfile');
+        const sessionsList = document.getElementById('sessionsList');
+        
+        // Variables d'état
+        let isPlaying = false;
+        let isMusicPlaying = true;
+        let isFocusMode = false;
+        let timerInterval;
+        let sessionTimer;
+        let currentSessionDuration = 300; // 5 minutes par défaut
+        let elapsedSeconds = 0;
+        let sessions = [];
+        let currentAudio = lofiMusic;
+        let currentSoundType = 'lofi';
+        
+        // Initialiser depuis le localStorage
+        function initFromStorage() {
+            // Charger les sessions sauvegardées
+            const savedSessions = localStorage.getItem('meditationSessions');
+            if (savedSessions) {
+                sessions = JSON.parse(savedSessions);
+                updateStats();
+                updateSessionsList();
+            }
+            
+            // Charger les préférences utilisateur
+            const userPrefs = localStorage.getItem('userPreferences');
+            if (userPrefs) {
+                const prefs = JSON.parse(userPrefs);
+                if (prefs.defaultDuration) {
+                    sessionDuration.value = prefs.defaultDuration;
+                    updateSelectedDuration();
+                }
+                if (prefs.musicType) {
+                    document.getElementById('musicType').value = prefs.musicType;
+                    selectSoundType(prefs.musicType);
+                }
+                if (prefs.userName) {
+                    document.getElementById('userName').textContent = prefs.userName;
+                }
+                if (prefs.joinDate) {
+                    document.getElementById('joinDate').textContent = prefs.joinDate;
+                }
+            } else {
+                // Préférences par défaut
+                const defaultPrefs = {
+                    userName: "Méditant Zen",
+                    joinDate: new Date().toLocaleDateString('fr-FR'),
+                    defaultDuration: "300",
+                    musicType: "lofi",
+                    enableNotifications: true
+                };
+                localStorage.setItem('userPreferences', JSON.stringify(defaultPrefs));
+            }
+        }
+        
+        // Sélectionner un type de son
+        function selectSoundType(soundType) {
+            currentSoundType = soundType;
+            
+            // Mettre à jour l'apparence des boutons
+            musicOptions.forEach(option => {
+                if (option.dataset.sound === soundType) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+            
+            // Arrêter la musique en cours
+            stopAllAudio();
+            
+            // Sélectionner le nouvel audio
+            switch(soundType) {
+                case 'lofi':
+                    currentAudio = lofiMusic;
+                    break;
+                case 'nature':
+                    currentAudio = natureSounds;
+                    break;
+                case 'ambient':
+                    currentAudio = ambientMusic;
+                    break;
+                case 'breathing':
+                    currentAudio = breathingSound;
+                    break;
+                case 'none':
+                    currentAudio = null;
+                    break;
+            }
+            
+            // Si la musique est activée et qu'une session est en cours, démarrer le nouvel audio
+            if (isMusicPlaying && isPlaying && currentAudio) {
+                currentAudio.currentTime = 0;
+                currentAudio.play().catch(e => console.log("Erreur de lecture audio:", e));
+                updateAudioVisualizer();
+            }
+        }
+        
+        // Arrêter tous les audio
+        function stopAllAudio() {
+            lofiMusic.pause();
+            lofiMusic.currentTime = 0;
+            natureSounds.pause();
+            natureSounds.currentTime = 0;
+            ambientMusic.pause();
+            ambientMusic.currentTime = 0;
+            breathingSound.pause();
+            breathingSound.currentTime = 0;
+        }
+        
+        // Mettre à jour l'affichage de la durée
+        function updateSelectedDuration() {
+            const minutes = Math.floor(sessionDuration.value / 60);
+            const seconds = sessionDuration.value % 60;
+            selectedDuration.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            currentSessionDuration = parseInt(sessionDuration.value);
+            
+            // Mettre à jour le timer en mode focus
+            if (isFocusMode) {
+                timerDisplay.textContent = selectedDuration.textContent;
+            }
+        }
+        
+        // Formatage du temps (mm:ss)
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Mettre à jour la progression
+        function updateProgress() {
+            const percent = Math.min(100, Math.floor((elapsedSeconds / currentSessionDuration) * 100));
+            progressBar.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            
+            // Si la session est terminée
+            if (elapsedSeconds >= currentSessionDuration) {
+                endSession();
+            } else {
+                elapsedSeconds++;
+            }
+        }
+        
+        // Mettre à jour le timer en mode focus
+        function updateTimer() {
+            const remaining = currentSessionDuration - elapsedSeconds;
+            timerDisplay.textContent = formatTime(remaining);
+            
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                endSession();
+            }
+        }
+        
+        // Mettre à jour le visualiseur audio
+        function updateAudioVisualizer() {
+            if (isMusicPlaying && currentAudio && !currentAudio.paused) {
+                audioVisualizer.classList.remove('hidden');
+            } else {
+                audioVisualizer.classList.add('hidden');
+            }
+        }
+        
+        // Démarrer une session
+        function startSession() {
+            isPlaying = true;
+            elapsedSeconds = 0;
+            
+            // Jouer le son de démarrage si activé
+            if (document.getElementById('enableStartSound').checked) {
+                startSound.currentTime = 0;
+                startSound.volume = volumeSlider.value / 100;
+                startSound.play().catch(e => console.log("Son de démarrage non joué:", e));
+            }
+            
+            // Mettre à jour le bouton
+            playIcon.className = "fas fa-pause text-6xl mb-4";
+            playText.textContent = "Pause";
+            breatheBtn.classList.add('breathing-btn');
+            stopBtn.classList.remove('hidden');
+            
+            // Démarrer la musique si activée
+            if (isMusicPlaying && currentAudio && currentSoundType !== 'none') {
+                currentAudio.currentTime = 0;
+                currentAudio.volume = volumeSlider.value / 100;
+                currentAudio.loop = currentSoundType !== 'breathing';
+                currentAudio.play().catch(e => {
+                    console.log("Erreur de lecture audio:", e);
+                    // Fallback: utiliser l'audio API si les fichiers externes échouent
+                    playFallbackAudio();
+                });
+                soundWave.style.animationPlayState = 'running';
+                updateAudioVisualizer();
+            }
+            
+            // Démarrer les timers
+            sessionTimer = setInterval(updateProgress, 1000);
+            
+            // Si en mode focus, démarrer aussi le timer focus
+            if (isFocusMode) {
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            // Démarrer l'animation de respiration
+            breatheBtn.style.animationPlayState = 'running';
+        }
+        
+        // Audio de secours
+        function playFallbackAudio() {
+            console.log("Utilisation de l'audio de secours");
+            // Créer un contexte audio simple pour générer un son de secours
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 220; // Fréquence en Hz (note basse)
+                oscillator.type = 'sine'; // Type d'onde
+                
+                gainNode.gain.value = volumeSlider.value / 500; // Volume réduit
+                
+                oscillator.start();
+                
+                // Arrêter après 0.5 secondes (juste un bip)
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 500);
+            } catch (e) {
+                console.log("Audio context non supporté:", e);
+            }
+        }
+        
+        // Mettre en pause la session
+        function pauseSession() {
+            isPlaying = false;
+            
+            // Mettre à jour le bouton
+            playIcon.className = "fas fa-play text-6xl mb-4";
+            playText.textContent = "Reprendre";
+            breatheBtn.classList.remove('breathing-btn');
+            
+            // Mettre en pause la musique
+            if (currentAudio) {
+                currentAudio.pause();
+                soundWave.style.animationPlayState = 'paused';
+                updateAudioVisualizer();
+            }
+            
+            // Arrêter les timers
+            clearInterval(sessionTimer);
+            if (isFocusMode) {
+                clearInterval(timerInterval);
+            }
+            
+            // Arrêter l'animation de respiration
+            breatheBtn.style.animationPlayState = 'paused';
+        }
+        
+        // Arrêter la session
+        function stopSession() {
+            isPlaying = false;
+            
+            // Mettre à jour le bouton
+            playIcon.className = "fas fa-play text-6xl mb-4";
+            playText.textContent = "Démarrer";
+            breatheBtn.classList.remove('breathing-btn');
+            stopBtn.classList.add('hidden');
+            
+            // Arrêter la musique
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                soundWave.style.animationPlayState = 'paused';
+                updateAudioVisualizer();
+            }
+            
+            // Arrêter les timers
+            clearInterval(sessionTimer);
+            if (isFocusMode) {
+                clearInterval(timerInterval);
+            }
+            
+            // Réinitialiser la progression
+            elapsedSeconds = 0;
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            
+            // Réinitialiser l'animation de respiration
+            breatheBtn.style.animationPlayState = 'paused';
+        }
+        
+        // Terminer une session (automatiquement)
+        function endSession() {
+            // Jouer le son de fin si activé
+            if (document.getElementById('enableEndSound').checked) {
+                endSound.currentTime = 0;
+                endSound.volume = volumeSlider.value / 100;
+                endSound.play().catch(e => console.log("Son de fin non joué:", e));
+            }
+            
+            stopSession();
+            
+            // Enregistrer la session
+            saveSession();
+            
+            // Notification
+            if (Notification.permission === "granted" && document.getElementById('enableNotifications').checked) {
+                new Notification("Session terminée !", {
+                    body: `Vous avez médité pendant ${formatTime(currentSessionDuration)}. Bravo !`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/2917/2917245.png"
+                });
+            }
+            
+            // Message de félicitations
+            setTimeout(() => {
+                alert(`Félicitations ! Vous avez terminé votre session de ${formatTime(currentSessionDuration)}.`);
+            }, 500);
+        }
+        
+        // Sauvegarder une session
+        function saveSession() {
+            const session = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('fr-FR'),
+                time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                duration: currentSessionDuration,
+                soundType: currentSoundType,
+                timestamp: Date.now()
+            };
+            
+            sessions.unshift(session);
+            
+            // Garder seulement les 50 dernières sessions
+            if (sessions.length > 50) {
+                sessions = sessions.slice(0, 50);
+            }
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem('meditationSessions', JSON.stringify(sessions));
+            
+            // Mettre à jour les statistiques
+            updateStats();
+            updateSessionsList();
+        }
+        
+        // Mettre à jour les statistiques
+        function updateStats() {
+            // Statistiques générales
+            document.getElementById('statsSessions').textContent = sessions.length;
+            
+            // Calcul du temps total
+            const totalSeconds = sessions.reduce((total, session) => total + session.duration, 0);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            document.getElementById('statsTime').textContent = `${totalMinutes}min`;
+            
+            // Calcul des jours consécutifs
+            const today = new Date().toDateString();
+            const sessionDates = sessions.map(s => new Date(s.timestamp).toDateString());
+            const uniqueDates = [...new Set(sessionDates)];
+            const sortedDates = uniqueDates.sort((a, b) => new Date(b) - new Date(a));
+            
+            let streak = 0;
+            let currentDate = new Date();
+            
+            for (let i = 0; i < sortedDates.length; i++) {
+                const sessionDate = new Date(sortedDates[i]);
+                if (sessionDate.toDateString() === currentDate.toDateString()) {
+                    streak++;
+                    currentDate.setDate(currentDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            
+            document.getElementById('statsStreak').textContent = streak;
+            
+            // Mettre à jour le modal des sessions
+            document.getElementById('totalSessions').textContent = sessions.length;
+            document.getElementById('totalTime').textContent = `${totalMinutes}min`;
+            document.getElementById('avgDuration').textContent = sessions.length > 0 
+                ? `${Math.floor(totalSeconds / sessions.length / 60)}min` 
+                : '0min';
+                
+            // Mettre à jour les objectifs
+            const weeklySessions = sessions.filter(s => {
+                const sessionDate = new Date(s.timestamp);
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                return sessionDate >= oneWeekAgo;
+            }).length;
+            
+            const weeklyGoal = 5;
+            const weeklyPercent = Math.min(100, (weeklySessions / weeklyGoal) * 100);
+            document.getElementById('sessionsProgress').textContent = `${weeklySessions}/${weeklyGoal}`;
+            document.getElementById('sessionsGoalBar').style.width = `${weeklyPercent}%`;
+            
+            const monthlyMinutes = totalMinutes;
+            const monthlyGoal = 120;
+            const monthlyPercent = Math.min(100, (monthlyMinutes / monthlyGoal) * 100);
+            document.getElementById('timeProgress').textContent = `${monthlyMinutes}/${monthlyGoal}min`;
+            document.getElementById('timeGoalBar').style.width = `${monthlyPercent}%`;
+            
+            // Générer le graphique des 7 derniers jours
+            generateWeeklyChart();
+        }
+        
+        // Générer le graphique des 7 derniers jours
+        function generateWeeklyChart() {
+            const chartContainer = document.getElementById('weeklyChart');
+            chartContainer.innerHTML = '';
+            
+            // Obtenir les dates des 7 derniers jours
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                days.push(date.toLocaleDateString('fr-FR', { weekday: 'short' }));
+            }
+            
+            // Compter les sessions par jour
+            const sessionCounts = new Array(7).fill(0);
+            const today = new Date();
+            
+            sessions.forEach(session => {
+                const sessionDate = new Date(session.timestamp);
+                const dayDiff = Math.floor((today - sessionDate) / (1000 * 60 * 60 * 24));
+                
+                if (dayDiff >= 0 && dayDiff < 7) {
+                    sessionCounts[6 - dayDiff]++;
+                }
+            });
+            
+            // Trouver le maximum pour l'échelle
+            const maxCount = Math.max(...sessionCounts, 1);
+            
+            // Créer les barres du graphique
+            days.forEach((day, index) => {
+                const dayContainer = document.createElement('div');
+                dayContainer.className = 'mb-2';
+                
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'flex justify-between text-sm mb-1';
+                dayLabel.innerHTML = `<span>${day}</span><span>${sessionCounts[index]} session(s)</span>`;
+                
+                const barContainer = document.createElement('div');
+                barContainer.className = 'w-full bg-gray-700 rounded-full h-4';
+                
+                const bar = document.createElement('div');
+                bar.className = 'graph-bar';
+                bar.style.width = `${(sessionCounts[index] / maxCount) * 100}%`;
+                
+                barContainer.appendChild(bar);
+                dayContainer.appendChild(dayLabel);
+                dayContainer.appendChild(barContainer);
+                chartContainer.appendChild(dayContainer);
+            });
+        }
+        
+        // Mettre à jour la liste des sessions
+        function updateSessionsList() {
+            sessionsList.innerHTML = '';
+            
+            if (sessions.length === 0) {
+                sessionsList.innerHTML = '<p class="text-gray-400 text-center py-4">Aucune session enregistrée</p>';
+                return;
+            }
+            
+            // Afficher les 10 dernières sessions
+            const recentSessions = sessions.slice(0, 10);
+            
+            recentSessions.forEach(session => {
+                const sessionItem = document.createElement('div');
+                sessionItem.className = 'bg-gray-800/50 p-4 rounded-xl';
+                
+                const durationMinutes = Math.floor(session.duration / 60);
+                const durationSeconds = session.duration % 60;
+                
+                // Icône selon le type de son
+                let soundIcon = 'fa-music';
+                if (session.soundType === 'nature') soundIcon = 'fa-tree';
+                if (session.soundType === 'ambient') soundIcon = 'fa-cloud';
+                if (session.soundType === 'breathing') soundIcon = 'fa-wind';
+                
+                sessionItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-bold">${durationMinutes} min ${durationSeconds > 0 ? durationSeconds + ' sec' : ''}</div>
+                            <div class="text-sm text-gray-400">${session.date} à ${session.time}</div>
+                            <div class="flex items-center mt-1 text-sm">
+                                <i class="fas ${soundIcon} text-green-400 mr-2"></i>
+                                <span class="text-gray-300">${session.soundType}</span>
+                            </div>
+                        </div>
+                        <button class="delete-session text-red-400 hover:text-red-300" data-id="${session.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                sessionsList.appendChild(sessionItem);
+            });
+            
+            // Ajouter les événements pour supprimer les sessions
+            document.querySelectorAll('.delete-session').forEach(button => {
+                button.addEventListener('click', function() {
+                    const sessionId = parseInt(this.getAttribute('data-id'));
+                    deleteSession(sessionId);
+                });
+            });
+        }
+        
+        // Supprimer une session
+        function deleteSession(id) {
+            sessions = sessions.filter(session => session.id !== id);
+            localStorage.setItem('meditationSessions', JSON.stringify(sessions));
+            updateStats();
+            updateSessionsList();
+        }
+        
+        // Effacer toutes les sessions
+        function clearAllSessions() {
+            if (confirm("Êtes-vous sûr de vouloir supprimer toutes vos sessions ? Cette action est irréversible.")) {
+                sessions = [];
+                localStorage.removeItem('meditationSessions');
+                updateStats();
+                updateSessionsList();
+            }
+        }
+        
+        // Sauvegarder les préférences du profil
+        function saveProfilePreferences() {
+            const prefs = {
+                userName: document.getElementById('userName').textContent,
+                joinDate: document.getElementById('joinDate').textContent,
+                defaultDuration: document.getElementById('defaultDuration').value,
+                musicType: document.getElementById('musicType').value,
+                enableNotifications: document.getElementById('enableNotifications').checked
+            };
+            
+            localStorage.setItem('userPreferences', JSON.stringify(prefs));
+            
+            // Appliquer les préférences
+            sessionDuration.value = prefs.defaultDuration;
+            updateSelectedDuration();
+            selectSoundType(prefs.musicType);
+            
+            alert("Préférences sauvegardées avec succès !");
+        }
+        
+        // Basculer le mode focus
+        function toggleFocusMode() {
+            isFocusMode = !isFocusMode;
+            
+            // Mettre à jour le bouton
+            focusToggle.innerHTML = isFocusMode 
+                ? '<i class="fas fa-times mr-2"></i>Quitter le mode Focus' 
+                : '<i class="fas fa-crosshairs mr-2"></i>Mode Focus';
+            
+            // Afficher/masquer le timer
+            focusTimer.classList.toggle('hidden', !isFocusMode);
+            
+            // Basculer les éléments de navigation
+            const focusElements = document.querySelectorAll('.focus-mode');
+            focusElements.forEach(el => {
+                if (isFocusMode) {
+                    el.classList.remove('visible-element');
+                    el.classList.add('hidden-element');
+                } else {
+                    el.classList.remove('hidden-element');
+                    el.classList.add('visible-element');
+                }
+            });
+            
+            // Si en mode focus et qu'une session est en cours, mettre à jour le timer
+            if (isFocusMode && isPlaying) {
+                timerInterval = setInterval(updateTimer, 1000);
+            } else if (!isFocusMode) {
+                clearInterval(timerInterval);
+            }
+        }
+        
+        // Basculer la musique
+        function toggleMusic() {
+            isMusicPlaying = !isMusicPlaying;
+            
+            if (isMusicPlaying) {
+                musicIcon.className = "fas fa-volume-up";
+                if (currentAudio && isPlaying && currentSoundType !== 'none') {
+                    currentAudio.play().catch(e => console.log("Erreur de reprise audio:", e));
+                    soundWave.style.animationPlayState = 'running';
+                    updateAudioVisualizer();
+                } else {
+                    soundWave.style.animationPlayState = 'paused';
+                }
+                volumeText.textContent = `${volumeSlider.value}%`;
+            } else {
+                musicIcon.className = "fas fa-volume-mute";
+                if (currentAudio) {
+                    currentAudio.pause();
+                }
+                soundWave.style.animationPlayState = 'paused';
+                audioVisualizer.classList.add('hidden');
+                volumeText.textContent = "Muet";
+            }
+        }
+        
+        // Mettre à jour le volume
+        function updateVolume() {
+            const volume = volumeSlider.value / 100;
+            volumeText.textContent = isMusicPlaying ? `${Math.round(volume * 100)}%` : "Muet";
+            
+            // Mettre à jour le volume de tous les éléments audio
+            lofiMusic.volume = volume;
+            natureSounds.volume = volume;
+            ambientMusic.volume = volume;
+            breathingSound.volume = volume;
+            startSound.volume = volume;
+            endSound.volume = volume;
+            
+            if (currentAudio && isMusicPlaying && isPlaying) {
+                currentAudio.volume = volume;
+            }
+        }
+        
+        // Événements
+        breatheBtn.addEventListener('click', function() {
+            if (isPlaying) {
+                pauseSession();
+            } else {
+                startSession();
+            }
+        });
+        
+        stopBtn.addEventListener('click', stopSession);
+        musicToggle.addEventListener('click', toggleMusic);
+        focusToggle.addEventListener('click', toggleFocusMode);
+        
+        volumeSlider.addEventListener('input', updateVolume);
+        sessionDuration.addEventListener('change', updateSelectedDuration);
+        
+        // Sélecteur de musique
+        musicOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const soundType = this.dataset.sound;
+                selectSoundType(soundType);
+            });
+        });
+        
+        // Modal events
+        sessionsBtn.addEventListener('click', () => {
+            sessionsModal.style.display = 'flex';
+            updateSessionsList();
+        });
+        
+        profileBtn.addEventListener('click', () => {
+            profileModal.style.display = 'flex';
+        });
+        
+        closeSessionsModal.addEventListener('click', () => {
+            sessionsModal.style.display = 'none';
+        });
+        
+        closeProfileModal.addEventListener('click', () => {
+            profileModal.style.display = 'none';
+        });
+        
+        clearSessions.addEventListener('click', clearAllSessions);
+        saveProfile.addEventListener('click', saveProfilePreferences);
+        
+        // Fermer les modals en cliquant à l'extérieur
+        window.addEventListener('click', (e) => {
+            if (e.target === sessionsModal) {
+                sessionsModal.style.display = 'none';
+            }
+            if (e.target === profileModal) {
+                profileModal.style.display = 'none';
+            }
+        });
+        
+        // Initialisation
+        function init() {
+            updateSelectedDuration();
+            updateVolume();
+            initFromStorage();
+            
+            // Activer Lo-Fi par défaut
+            selectSoundType('lofi');
+            
+            // Configurer la boucle pour certains sons
+            breathingSound.loop = true;
+            lofiMusic.loop = true;
+            natureSounds.loop = true;
+            ambientMusic.loop = true;
+            
+            // Demander la permission pour les notifications
+            if ("Notification" in window && Notification.permission === "default") {
+                setTimeout(() => {
+                    Notification.requestPermission();
+                }, 2000);
+            }
+            
+            // Simulation de changement de couleur d'arrière-plan
+            let hue = 0;
+            setInterval(() => {
+                hue = (hue + 0.1) % 360;
+                document.body.style.filter = `hue-rotate(${hue}deg)`;
+            }, 10000);
+            
+            // Effet de frappe pour le titre
+            const title = document.querySelector('h1');
+            const originalText = title.textContent;
+            title.textContent = '';
+            
+            let i = 0;
+            const typeWriter = () => {
+                if (i < originalText.length) {
+                    title.textContent += originalText.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 50);
+                }
+            };
+            
+            // Démarrer l'effet après le chargement de la page
+            setTimeout(typeWriter, 500);
+        }
+        
+        // Démarrer l'initialisation
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
